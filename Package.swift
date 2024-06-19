@@ -12,7 +12,13 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ObjCDump"
+            name: "ObjCDump",
+            dependencies: [
+                "ObjCTypeDecodeKit"
+            ]
+        ),
+        .target(
+            name: "ObjCTypeDecodeKit"
         ),
         .testTarget(
             name: "ObjCDumpTests",
