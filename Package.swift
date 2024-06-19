@@ -24,5 +24,9 @@ let package = Package(
             name: "ObjCDumpTests",
             dependencies: ["ObjCDump"]
         ),
+        .testTarget(
+            name: "ObjCTypeDecodeKitTests",
+            dependencies: ["ObjCTypeDecodeKit"]
+        ),
     ]
 )
