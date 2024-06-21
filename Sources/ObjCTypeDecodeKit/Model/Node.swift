@@ -9,6 +9,6 @@
 import Foundation
 
 public struct Node {
-    public var decoded: String?
+    public var decoded: ObjCType?
     public var trailing: String?
 }

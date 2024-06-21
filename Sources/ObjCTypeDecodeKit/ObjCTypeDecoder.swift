@@ -10,7 +10,7 @@ import Foundation
 
 public enum ObjCTypeDecoder {
 
-    public static func decoded(_ type: String) -> String? {
+    public static func decoded(_ type: String) -> ObjCType? {
         _decoded(type)?.decoded
     }
 
@@ -23,9 +23,9 @@ public enum ObjCTypeDecoder {
         case _ where type.starts(with: "@?"):
             var trailing = type
             trailing.removeFirst(2)
-            return .init(decoded: "id /* block */", trailing: trailing)
+            return .init(decoded: .block, trailing: trailing)
 
-        case _ where type.starts(with: "@"):
+        case _ where type.starts(with: #"@""#):
             guard let closingIndex = type.indexForFirstMatchingQuote(
                 openIndex: type.index(after: type.startIndex)
             ) else { return nil }
@@ -37,7 +37,7 @@ public enum ObjCTypeDecoder {
             if type.distance(from: endIndex, to: type.endIndex) > 0 {
                 trailing = String(type[endIndex ..< type.endIndex])
             }
-            return .init(decoded: "\(name) *", trailing: trailing)
+            return .init(decoded: .object(name: name), trailing: trailing)
 
         case _ where simpleTypes.keys.contains(first):
             var trailing = type
@@ -53,7 +53,7 @@ public enum ObjCTypeDecoder {
                 return nil
             }
             return .init(
-                decoded: "\(modifier) \(contentType)",
+                decoded: .modified(modifier, type: contentType),
                 trailing: content.trailing
             )
 
@@ -78,28 +78,32 @@ public enum ObjCTypeDecoder {
         content.removeFirst() // ^
 
         guard let node = _decoded(content),
-              let decodedContent = node.decoded else {
+              let contentType = node.decoded else {
             return nil
         }
 
-        return .init(decoded: "\(decodedContent) *", trailing: node.trailing)
+        return .init(decoded: .pointer(type: contentType), trailing: node.trailing)
     }
 
     // MARK: - Bit Field b
-    private static func _decodeBitField(_ type: String, name: String) -> (field: String, trailing: String?)? {
+    private static func _decodeBitField(_ type: String, name: String) -> (field: ObjCField, trailing: String?)? {
         var content = type
         content.removeFirst() // b
 
-        guard let length = content.readInitialDigits() else {
+        guard let _length = content.readInitialDigits(),
+              let length = Int(_length) else {
             return nil
         }
 
         var trailing: String?
-        let startInex = content.index(content.startIndex, offsetBy: length.count)
+        let startInex = content.index(content.startIndex, offsetBy: _length.count)
         if content.distance(from: startInex, to: content.endIndex) > 0 {
             trailing = String(content[startInex ..< content.endIndex])
         }
-        return ("int \(name) : \(length);", trailing)
+        return (
+            .init(type: .int, name: name, bitWidth: length),
+            trailing
+        )
     }
 
     // MARK: - Array []
@@ -116,24 +120,29 @@ public enum ObjCTypeDecoder {
 
         let length = content.readInitialDigits()
 
-        if let length {
-            content.removeFirst(length.count)
+        if let _length = length,
+           let length = Int(_length) {
+            content.removeFirst(_length.count)
             guard let node = _decoded(content),
-                  let decodedContent = node.decoded else {
+                  let contentType = node.decoded else {
                 return nil
             }
 
             // TODO: `node.trailing` must be empty
             var trailing: String?
-            let startInex = type.index(startInex, offsetBy: length.count)
+            let startInex = type.index(startInex, offsetBy: _length.count)
             if type.distance(from: startInex, to: type.endIndex) > 0 {
                 trailing = String(type[startInex ..< type.endIndex])
             }
-            return .init(decoded: "\(decodedContent)[\(length)]", trailing: trailing)
+
+            return .init(
+                decoded: .array(type: contentType, size: length),
+                trailing: trailing
+            )
         }
 
         guard let node = _decoded(content),
-              let decodedContent = node.decoded else {
+              let contentType = node.decoded else {
             return nil
         }
 
@@ -143,7 +152,10 @@ public enum ObjCTypeDecoder {
             trailing = String(type[type.index(after: endIndex) ..< type.endIndex])
         }
 
-        return .init(decoded: "\(decodedContent)[]", trailing: trailing)
+        return .init(
+            decoded: .array(type: contentType, size: nil),
+            trailing: trailing
+        )
     }
 
     // MARK: - Union ()
@@ -184,11 +196,11 @@ public enum ObjCTypeDecoder {
             return nil
         }
 
-        var typeName = String(content[content.startIndex ..< equalIndex])
-        if typeName == "?" { typeName = "" }
+        var typeName: String? = String(content[content.startIndex ..< equalIndex])
+        if typeName == "?" { typeName = nil }
 
         var _fields = String(content[content.index(equalIndex, offsetBy: 1) ..< content.endIndex])
-        var fields: [String] = []
+        var fields: [ObjCField] = []
 
         var number = 0
         while !_fields.isEmpty {
@@ -207,13 +219,21 @@ public enum ObjCTypeDecoder {
             trailing = String(type[type.index(after: endIndex) ..< type.endIndex])
         }
 
-        return .init(
-            decoded: "\(kind.rawValue) \(typeName) { \(fields.joined(separator: " ")) }",
-            trailing: trailing
-        )
+        switch kind {
+        case .struct:
+            return .init(
+                decoded: .struct(name: typeName, fields: fields),
+                trailing: trailing
+            )
+        case .union:
+            return .init(
+                decoded: .union(name: typeName, fields: fields),
+                trailing: trailing)
+
+        }
     }
 
-    private static func _decodeField(_ type: String, number: Int) -> (field: String, trailing: String?)? {
+    private static func _decodeField(_ type: String, number: Int) -> (field: ObjCField, trailing: String?)? {
         guard let first = type.first else { return nil }
         switch first {
         case "b":
@@ -229,7 +249,10 @@ public enum ObjCTypeDecoder {
             let contentType = String(type[type.index(after: endIndex) ..< type.endIndex])
             if let node = _decoded(contentType),
                   let contentType = node.decoded {
-                return ("\(contentType) \(name);", node.trailing)
+                return (
+                    .init(type: contentType, name: name),
+                    node.trailing
+                )
             } else if contentType.starts(with: "b"),
                     let (field, trailing) = _decodeBitField(contentType, name: name) {
                 return (field, trailing)
@@ -240,7 +263,10 @@ public enum ObjCTypeDecoder {
                   let decoded = node.decoded else {
                 return nil
             }
-            return ("\(decoded) x\(number);", node.trailing)
+            return (
+                .init(type: decoded, name: "x\(number)"),
+                node.trailing
+            )
         }
     }
 }
