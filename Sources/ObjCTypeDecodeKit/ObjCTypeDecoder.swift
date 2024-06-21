@@ -18,8 +18,8 @@ public enum ObjCTypeDecoder {
         guard let first = type.first else { return nil }
 
         switch first {
-        // decode `id`
-        // ref: https://github.com/gnustep/libobjc2/blob/2855d1771478e1e368fcfeb4d56aecbb4d9429ca/encoding2.c#L159
+            // decode `id`
+            // ref: https://github.com/gnustep/libobjc2/blob/2855d1771478e1e368fcfeb4d56aecbb4d9429ca/encoding2.c#L159
         case _ where type.starts(with: "@?"):
             var trailing = type
             trailing.removeFirst(2)
@@ -54,6 +54,22 @@ public enum ObjCTypeDecoder {
                 trailing: content.trailing
             )
 
+        case "b":
+            var content = type
+            content.removeFirst()
+
+            guard let _length = content.readInitialDigits(),
+                  let length = Int(_length) else {
+                return nil
+            }
+            let trailing = type.trailing(
+                after: type.index(type.startIndex, offsetBy: _length.count)
+            )
+            return .init(
+                decoded: .bitField(width: length),
+                trailing: trailing
+            )
+
         case "[":
             return _decodeArray(type)
         case "^":
@@ -68,6 +84,18 @@ public enum ObjCTypeDecoder {
         }
         return nil
     }
+}
+
+extension ObjCTypeDecoder {
+    public static func decodeField(_ type: String) -> ObjCField? {
+        guard let (field, _) = _decodeField(type) else {
+            return nil
+        }
+        return field
+    }
+}
+
+extension ObjCTypeDecoder {
 
     // MARK: - Pointer ^
     private static func _decodePointer(_ type: String) -> Node? {
@@ -239,15 +267,15 @@ public enum ObjCTypeDecoder {
             let name = String(type[startIndex ..< endIndex])
 
             let contentType = String(type[type.index(after: endIndex) ..< type.endIndex])
-            if let node = _decoded(contentType),
-                  let contentType = node.decoded {
+            if contentType.starts(with: "b"),
+               let (field, trailing) = _decodeBitField(contentType, name: name) {
+                return (field, trailing)
+            } else if let node = _decoded(contentType),
+                      let contentType = node.decoded {
                 return (
                     .init(type: contentType, name: name),
                     node.trailing
                 )
-            } else if contentType.starts(with: "b"),
-                    let (field, trailing) = _decodeBitField(contentType, name: name) {
-                return (field, trailing)
             } else { return nil }
 
         default:

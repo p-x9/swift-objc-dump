@@ -48,6 +48,8 @@ public indirect enum ObjCType {
     case array(type: ObjCType, size: Int?)
     case pointer(type: ObjCType)
 
+    case bitField(width: Int)
+
     case union(name: String?, fields: [ObjCField])
     case `struct`(name: String?, fields: [ObjCField])
 
@@ -97,6 +99,8 @@ extension ObjCType: ObjCTypeDecodable {
             }
         case .pointer(let type):
             return "\(type.decoded(tab: tab)) *"
+        case .bitField(let width):
+            return "int x : \(width)"
         case .union(let name, let fields):
             guard !fields.isEmpty else {
                 if let name {
@@ -206,6 +210,8 @@ extension ObjCType: ObjCTypeEncodable {
             }
         case .pointer(let type):
             return "^\(type.encoded())"
+        case .bitField(let width):
+            return "b\(width)"
         case .union(let name, let fields):
             guard !fields.isEmpty else {
                 if let name { return "(\(name))" }
