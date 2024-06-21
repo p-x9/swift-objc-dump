@@ -78,7 +78,7 @@ final class ObjCTypeEncodeTests: XCTestCase {
         checkEncode("Ai")
         checkEncode("A*")
         checkEncode("^AQ")
-//        XCTAssertEqual(decoded("^A{CGPoint}"), "_Atomic CGPoint *")
+        XCTAssertEqual(decoded("^A{CGPoint}"), "_Atomic CGPoint *")
     }
 
     func testComplex() {

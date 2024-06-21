@@ -65,3 +65,12 @@ extension String {
         return digits.isEmpty ? nil : digits
     }
 }
+
+extension String {
+    func trailing(after index: Index) -> String? {
+        if distance(from: index, to: endIndex) > 0 {
+            return String(self[self.index(after: index) ..< endIndex])
+        }
+        return nil
+    }
+}

@@ -33,10 +33,7 @@ public enum ObjCTypeDecoder {
             let endIndex = type.index(type.startIndex, offsetBy: closingIndex)
             let name = String(type[startIndex ..< endIndex])
 
-            var trailing: String?
-            if type.distance(from: endIndex, to: type.endIndex) > 0 {
-                trailing = String(type[endIndex ..< type.endIndex])
-            }
+            let trailing = type.trailing(after: endIndex)
             return .init(decoded: .object(name: name), trailing: trailing)
 
         case _ where simpleTypes.keys.contains(first):
@@ -95,11 +92,9 @@ public enum ObjCTypeDecoder {
             return nil
         }
 
-        var trailing: String?
-        let startInex = content.index(content.startIndex, offsetBy: _length.count)
-        if content.distance(from: startInex, to: content.endIndex) > 0 {
-            trailing = String(content[startInex ..< content.endIndex])
-        }
+        let endInex = content.index(content.startIndex, offsetBy: _length.count)
+        let trailing = type.trailing(after: endInex)
+
         return (
             .init(type: .int, name: name, bitWidth: length),
             trailing
@@ -129,11 +124,7 @@ public enum ObjCTypeDecoder {
             }
 
             // TODO: `node.trailing` must be empty
-            var trailing: String?
-            let startInex = type.index(startInex, offsetBy: _length.count)
-            if type.distance(from: startInex, to: type.endIndex) > 0 {
-                trailing = String(type[startInex ..< type.endIndex])
-            }
+            let trailing = type.trailing(after: endIndex)
 
             return .init(
                 decoded: .array(type: contentType, size: length),
@@ -147,10 +138,7 @@ public enum ObjCTypeDecoder {
         }
 
         // TODO: `node.trailing` must be empty
-        var trailing: String?
-        if type.distance(from: endIndex, to: type.endIndex) > 0 {
-            trailing = String(type[type.index(after: endIndex) ..< type.endIndex])
-        }
+        let trailing = type.trailing(after: endIndex)
 
         return .init(
             decoded: .array(type: contentType, size: nil),
@@ -191,9 +179,16 @@ public enum ObjCTypeDecoder {
         let endIndex = type.index(type.startIndex, offsetBy: closingIndex)
 
         let content = String(type[startInex ..< endIndex]) // (content)
-        guard !content.isEmpty,
-              let equalIndex = content.firstIndex(of: "=") else {
-            return nil
+        guard !content.isEmpty else { return nil }
+
+        guard let equalIndex = content.firstIndex(of: "=") else {
+            let trailing = type.trailing(after: endIndex)
+            switch kind {
+            case .struct:
+                return .init(decoded: .struct(name: content, fields: []), trailing: trailing)
+            case .union:
+                return .init(decoded: .union(name: content, fields: []), trailing: trailing)
+            }
         }
 
         var typeName: String? = String(content[content.startIndex ..< equalIndex])
@@ -214,10 +209,7 @@ public enum ObjCTypeDecoder {
             }
         }
 
-        var trailing: String?
-        if type.distance(from: endIndex, to: type.endIndex) > 0 {
-            trailing = String(type[type.index(after: endIndex) ..< type.endIndex])
-        }
+        let trailing = type.trailing(after: endIndex)
 
         switch kind {
         case .struct:

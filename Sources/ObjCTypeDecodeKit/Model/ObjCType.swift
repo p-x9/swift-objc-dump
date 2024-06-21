@@ -98,6 +98,13 @@ extension ObjCType: ObjCTypeDecodable {
         case .pointer(let type):
             return "\(type.decoded(tab: tab)) *"
         case .union(let name, let fields):
+            guard !fields.isEmpty else {
+                if let name {
+                    return name
+                } else {
+                    return "union {}"
+                }
+            }
             let fields = fields
                 .enumerated()
                 .map {
@@ -121,6 +128,13 @@ extension ObjCType: ObjCTypeDecodable {
                 """
             }
         case .struct(let name, let fields):
+            guard !fields.isEmpty else {
+                if let name {
+                    return name
+                } else {
+                    return "struct {}"
+                }
+            }
             let fields = fields
                 .enumerated()
                 .map {

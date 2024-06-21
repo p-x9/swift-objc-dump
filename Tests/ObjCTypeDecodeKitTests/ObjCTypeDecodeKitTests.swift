@@ -182,7 +182,7 @@ final class ObjCTypeDecodeKitTests: XCTestCase {
             decoded("^AQ"),
             "_Atomic unsigned long long *"
         )
-//        XCTAssertEqual(decoded("^A{CGPoint}"), "_Atomic CGPoint *")
+        XCTAssertEqual(decoded("^A{CGPoint}"), "_Atomic CGPoint *")
     }
 
     func testComplex() {
