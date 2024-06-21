@@ -3,7 +3,7 @@
 //
 //
 //  Created by p-x9 on 2024/06/21
-//  
+//
 //
 
 import Foundation
@@ -56,8 +56,8 @@ public indirect enum ObjCType {
     case other(String)
 }
 
-extension ObjCType: CustomStringConvertible {
-    public var description: String {
+extension ObjCType: ObjCTypeDecodable {
+    public func decoded(tab: String = "    ") -> String {
         switch self {
         case .class: return "Class"
         case .selector: return "SEL"
@@ -91,18 +91,19 @@ extension ObjCType: CustomStringConvertible {
             return "id /* block */"
         case .array(let type, let size):
             if let size {
-                return "\(type)[\(size)]"
+                return "\(type.decoded(tab: tab))[\(size)]"
             } else {
-                return "\(type)[]"
+                return "\(type.decoded(tab: tab))[]"
             }
         case .pointer(let type):
-            return "\(type) *"
+            return "\(type.decoded(tab: tab)) *"
         case .union(let name, let fields):
             let fields = fields
+                .enumerated()
                 .map {
-                    "\($0)"
+                    $1.decoded(fallbackName: "x\($0)", tab: tab)
                         .components(separatedBy: .newlines)
-                        .map { "    " + $0 }
+                        .map { tab + $0 }
                         .joined(separator: "\n")
                 }
                 .joined(separator: "\n")
@@ -121,10 +122,11 @@ extension ObjCType: CustomStringConvertible {
             }
         case .struct(let name, let fields):
             let fields = fields
+                .enumerated()
                 .map {
-                    "\($0)"
+                    $1.decoded(fallbackName: "x\($0)", tab: tab)
                         .components(separatedBy: .newlines)
-                        .map { "    " + $0 }
+                        .map { tab + $0 }
                         .joined(separator: "\n")
                 }
                 .joined(separator: "\n")
@@ -142,7 +144,72 @@ extension ObjCType: CustomStringConvertible {
                 """
             }
         case .modified(let modifier, let type):
-            return "\(modifier.modifier) \(type)"
+            return "\(modifier.decoded(tab: tab)) \(type.decoded(tab: tab))"
+
+        case .other(let string):
+            return string
+        }
+    }
+}
+
+extension ObjCType: ObjCTypeEncodable {
+    public func encoded() -> String {
+        switch self {
+        case .class: return "#"
+        case .selector: return ":"
+        case .char: return "c"
+        case .uchar: return "C"
+        case .short: return "s"
+        case .ushort: return "S"
+        case .int: return "i"
+        case .uint: return "I"
+        case .long: return "l"
+        case .ulong: return "L"
+        case .longLong: return "q"
+        case .ulongLong: return "Q"
+        case .int128: return "t"
+        case .uint128: return "T"
+        case .float: return "f"
+        case .double: return "d"
+        case .longDouble: return "D"
+        case .bool: return "B"
+        case .void: return "v"
+        case .unknown: return "?"
+        case .charPtr: return "*"
+        case .atom: return "%"
+        case .object(let name):
+            if let name {
+                return "@\"\(name)\""
+            } else {
+                return "@"
+            }
+        case .block: return "@?"
+        case .array(let type, let size):
+            if let size {
+                return "[\(size)\(type.encoded())]"
+            } else {
+                return "[\(type.encoded())]"
+            }
+        case .pointer(let type):
+            return "^\(type.encoded())"
+        case .union(let name, let fields):
+            let fields = fields.map({ $0.encoded() })
+                .joined()
+            if let name {
+                return "(\(name)=\(fields))"
+            } else {
+                return "(?=\(fields))"
+            }
+        case .struct(let name, let fields):
+            let fields = fields.map({ $0.encoded() })
+                .joined()
+            if let name {
+                return "{\(name)=\(fields)}"
+            } else {
+                return "{?=\(fields)}"
+            }
+        case .modified(let modifier, let type):
+            return "\(modifier.encoded())\(type.encoded())"
 
         case .other(let string):
             return string

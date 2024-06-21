@@ -14,12 +14,38 @@ public struct ObjCField {
     public var bitWidth: Int?
 }
 
-extension ObjCField: CustomStringConvertible {
-    public var description: String {
+extension ObjCField: ObjCTypeDecodable {
+    public func decoded(tab: String = "    ") -> String {
         if let bitWidth {
-            "\(type) \(name ?? "x") : \(bitWidth);"
+            "\(type.decoded(tab: tab)) \(name ?? "x") : \(bitWidth);"
         } else {
-            "\(type) \(name ?? "x");"
+            "\(type.decoded(tab: tab)) \(name ?? "x");"
+        }
+    }
+
+    public func decoded(fallbackName: String, tab: String = "    ") -> String {
+        if let bitWidth {
+            "\(type.decoded(tab: tab)) \(name ?? fallbackName) : \(bitWidth);"
+        } else {
+            "\(type.decoded(tab: tab)) \(name ?? fallbackName);"
+        }
+    }
+}
+
+extension ObjCField: ObjCTypeEncodable {
+    public func encoded() -> String {
+        if let bitWidth {
+            if let name {
+                return "\"\(name)\"b\(bitWidth)"
+            } else {
+                return "b\(bitWidth)"
+            }
+        } else {
+            if let name {
+                return "\"\(name)\"\(type.encoded())"
+            } else {
+                return "\(type.encoded())"
+            }
         }
     }
 }

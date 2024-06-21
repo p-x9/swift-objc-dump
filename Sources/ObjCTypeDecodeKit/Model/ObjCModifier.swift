@@ -21,8 +21,8 @@ public enum ObjCModifier: CaseIterable {
     case register
 }
 
-extension ObjCModifier {
-    public var encoded: Character {
+extension ObjCModifier: ObjCTypeEncodable {
+    public func encoded() -> String {
         switch self {
         case .complex: "j" // #include <complex.h>
         case .atomic: "A" // #include <stdatomic.h>
@@ -38,8 +38,8 @@ extension ObjCModifier {
     }
 }
 
-extension ObjCModifier {
-    public var modifier: String {
+extension ObjCModifier: ObjCTypeDecodable {
+    public func decoded(tab: String = "    ") -> String {
         switch self {
         case .complex: "_Complex" // #include <complex.h>
         case .atomic: "_Atomic" // #include <stdatomic.h>

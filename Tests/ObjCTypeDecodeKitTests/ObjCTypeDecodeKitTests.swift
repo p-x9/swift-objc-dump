@@ -220,7 +220,12 @@ final class ObjCTypeDecodeKitTests: XCTestCase {
 }
 
 extension ObjCTypeDecodeKitTests {
+    @_disfavoredOverload
     func decoded(_ type: String) -> String? {
-        ObjCTypeDecoder.decoded(type)?.description
+        ObjCTypeDecoder.decoded(type)?.decoded()
+    }
+
+    func decoded(_ type: String) -> ObjCType? {
+        ObjCTypeDecoder.decoded(type)
     }
 }

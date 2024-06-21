@@ -86,7 +86,7 @@ public enum ObjCTypeDecoder {
     }
 
     // MARK: - Bit Field b
-    private static func _decodeBitField(_ type: String, name: String) -> (field: ObjCField, trailing: String?)? {
+    private static func _decodeBitField(_ type: String, name: String?) -> (field: ObjCField, trailing: String?)? {
         var content = type
         content.removeFirst() // b
 
@@ -204,7 +204,7 @@ public enum ObjCTypeDecoder {
 
         var number = 0
         while !_fields.isEmpty {
-            guard let (field, trailing) = _decodeField(_fields, number: number) else { break }
+            guard let (field, trailing) = _decodeField(_fields) else { break }
             fields.append(field)
             if let trailing {
                 _fields = trailing
@@ -233,11 +233,11 @@ public enum ObjCTypeDecoder {
         }
     }
 
-    private static func _decodeField(_ type: String, number: Int) -> (field: ObjCField, trailing: String?)? {
+    private static func _decodeField(_ type: String) -> (field: ObjCField, trailing: String?)? {
         guard let first = type.first else { return nil }
         switch first {
         case "b":
-            return _decodeBitField(type, name: "x\(number)")
+            return _decodeBitField(type, name: nil)
         case "\"":
             guard let closingIndex = type.indexForFirstMatchingQuote(
                 openIndex: type.startIndex
@@ -264,7 +264,7 @@ public enum ObjCTypeDecoder {
                 return nil
             }
             return (
-                .init(type: decoded, name: "x\(number)"),
+                .init(type: decoded),
                 node.trailing
             )
         }
