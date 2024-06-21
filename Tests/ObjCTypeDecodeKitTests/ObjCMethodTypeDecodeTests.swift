@@ -210,6 +210,6 @@ extension ObjCMethodTypeDecodeTests {
 
 extension ObjCMethodTypeDecodeTests {
     func decoded(_ type: String) -> ObjCMethodType? {
-        ObjCMethodTypeDecoder.decoded(type)
+        ObjCMethodTypeDecoder.decode(type)
     }
 }

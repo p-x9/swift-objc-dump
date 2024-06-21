@@ -10,11 +10,11 @@ import Foundation
 
 public enum ObjCTypeDecoder {
 
-    public static func decoded(_ type: String) -> ObjCType? {
-        _decoded(type)?.decoded
+    public static func decode(_ type: String) -> ObjCType? {
+        _decode(type)?.decoded
     }
 
-    public static func _decoded(_ type: String) -> Node? {
+    public static func _decode(_ type: String) -> Node? {
         guard let first = type.first else { return nil }
 
         switch first {
@@ -45,7 +45,7 @@ public enum ObjCTypeDecoder {
             var content = type
             content.removeFirst()
             guard let modifier = modifiers[first],
-                  let content = _decoded(content),
+                  let content = _decode(content),
                   let contentType = content.decoded else {
                 return nil
             }
@@ -93,7 +93,7 @@ extension ObjCTypeDecoder {
         var content = type
         content.removeFirst() // ^
 
-        guard let node = _decoded(content),
+        guard let node = _decode(content),
               let contentType = node.decoded else {
             return nil
         }
@@ -137,7 +137,7 @@ extension ObjCTypeDecoder {
         if let _length = length,
            let length = Int(_length) {
             content.removeFirst(_length.count)
-            guard let node = _decoded(content),
+            guard let node = _decode(content),
                   let contentType = node.decoded else {
                 return nil
             }
@@ -151,7 +151,7 @@ extension ObjCTypeDecoder {
             )
         }
 
-        guard let node = _decoded(content),
+        guard let node = _decode(content),
               let contentType = node.decoded else {
             return nil
         }
@@ -261,7 +261,7 @@ extension ObjCTypeDecoder {
             if contentType.starts(with: "b"),
                let (field, trailing) = _decodeBitField(contentType, name: name) {
                 return (field, trailing)
-            } else if let node = _decoded(contentType),
+            } else if let node = _decode(contentType),
                       let contentType = node.decoded {
                 return (
                     .init(type: contentType, name: name),
@@ -270,7 +270,7 @@ extension ObjCTypeDecoder {
             } else { return nil }
 
         default:
-            guard let node = _decoded(type),
+            guard let node = _decode(type),
                   let decoded = node.decoded else {
                 return nil
             }

@@ -10,8 +10,8 @@ import Foundation
 
 public enum ObjCMethodTypeDecoder {
     // ref: https://github.com/apple-oss-distributions/objc4/blob/01edf1705fbc3ff78a423cd21e03dfc21eb4d780/runtime/objc-typeencoding.mm#L171
-    public static func decoded(_ type: String) -> ObjCMethodType? {
-        guard let node = ObjCTypeDecoder._decoded(type),
+    public static func decode(_ type: String) -> ObjCMethodType? {
+        guard let node = ObjCTypeDecoder._decode(type),
               let returnType = node.decoded,
               var trailing = node.trailing else {
             return nil
@@ -27,7 +27,7 @@ public enum ObjCMethodTypeDecoder {
         trailing.removeFirst(_stackSize.count)
 
         // self
-        guard let node = ObjCTypeDecoder._decoded(trailing),
+        guard let node = ObjCTypeDecoder._decode(trailing),
               let selfType = node.decoded,
               var trailing = node.trailing else {
             return nil
@@ -45,7 +45,7 @@ public enum ObjCMethodTypeDecoder {
         // arguments
         var arguments: [ObjCMethodType.ArgumentInfo] = []
         while !trailing.isEmpty {
-            guard let node = ObjCTypeDecoder._decoded(trailing),
+            guard let node = ObjCTypeDecoder._decode(trailing),
                   let type = node.decoded,
                   var _trailing = node.trailing else {
                 return nil

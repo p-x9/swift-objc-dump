@@ -100,10 +100,10 @@ extension ObjCTypeEncodeTests {
 extension ObjCTypeEncodeTests {
     @_disfavoredOverload
     func decoded(_ type: String) -> String? {
-        ObjCTypeDecoder.decoded(type)?.decoded()
+        ObjCTypeDecoder.decode(type)?.decoded()
     }
 
     func decoded(_ type: String) -> ObjCType? {
-        ObjCTypeDecoder.decoded(type)
+        ObjCTypeDecoder.decode(type)
     }
 }
