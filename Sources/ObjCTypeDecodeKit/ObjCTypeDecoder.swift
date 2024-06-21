@@ -87,15 +87,6 @@ public enum ObjCTypeDecoder {
 }
 
 extension ObjCTypeDecoder {
-    public static func decodeField(_ type: String) -> ObjCField? {
-        guard let (field, _) = _decodeField(type) else {
-            return nil
-        }
-        return field
-    }
-}
-
-extension ObjCTypeDecoder {
 
     // MARK: - Pointer ^
     private static func _decodePointer(_ type: String) -> Node? {
