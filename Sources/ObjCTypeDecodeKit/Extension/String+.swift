@@ -55,13 +55,16 @@ extension String {
     /// - Complexity: O(n), where n is the length of the string.
     func readInitialDigits() -> String? {
         var digits = ""
-        for char in self {
-            if char.isNumber {
+        for (i, char) in self.enumerated() {
+            if i == 0 && char == "-" {
+                digits.append("-")
+            } else if char.isNumber {
                 digits.append(char)
             } else {
                 break
             }
         }
+        if digits == "-" { return nil }
         return digits.isEmpty ? nil : digits
     }
 }

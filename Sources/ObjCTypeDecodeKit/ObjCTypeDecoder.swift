@@ -204,9 +204,9 @@ extension ObjCTypeDecoder {
             let trailing = type.trailing(after: endIndex)
             switch kind {
             case .struct:
-                return .init(decoded: .struct(name: content, fields: []), trailing: trailing)
+                return .init(decoded: .struct(name: content, fields: nil), trailing: trailing)
             case .union:
-                return .init(decoded: .union(name: content, fields: []), trailing: trailing)
+                return .init(decoded: .union(name: content, fields: nil), trailing: trailing)
             }
         }
 
