@@ -207,6 +207,10 @@ extension ObjCType: ObjCTypeEncodable {
         case .pointer(let type):
             return "^\(type.encoded())"
         case .union(let name, let fields):
+            guard !fields.isEmpty else {
+                if let name { return "(\(name))" }
+                else { return "()" }
+            }
             let fields = fields.map({ $0.encoded() })
                 .joined()
             if let name {
@@ -215,6 +219,10 @@ extension ObjCType: ObjCTypeEncodable {
                 return "(?=\(fields))"
             }
         case .struct(let name, let fields):
+            guard !fields.isEmpty else {
+                if let name { return "{\(name)}" }
+                else { return "{}" }
+            }
             let fields = fields.map({ $0.encoded() })
                 .joined()
             if let name {
