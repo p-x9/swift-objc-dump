@@ -50,8 +50,8 @@ public indirect enum ObjCType {
 
     case bitField(width: Int)
 
-    case union(name: String?, fields: [ObjCField])
-    case `struct`(name: String?, fields: [ObjCField])
+    case union(name: String?, fields: [ObjCField]?)
+    case `struct`(name: String?, fields: [ObjCField]?)
 
     case modified(_ modifier: ObjCModifier, type: ObjCType)
 
@@ -102,14 +102,14 @@ extension ObjCType: ObjCTypeDecodable {
         case .bitField(let width):
             return "int x : \(width)"
         case .union(let name, let fields):
-            guard !fields.isEmpty else {
+            guard let fields else {
                 if let name {
                     return name
                 } else {
                     return "union {}"
                 }
             }
-            let fields = fields
+            let fieldDefs = fields
                 .enumerated()
                 .map {
                     $1.decoded(fallbackName: "x\($0)", tab: tab)
@@ -121,25 +121,25 @@ extension ObjCType: ObjCTypeDecodable {
             if let name {
                 return """
                 union \(name) {
-                \(fields)
+                \(fieldDefs)
                 }
                 """
             } else {
                 return """
                 union {
-                \(fields)
+                \(fieldDefs)
                 }
                 """
             }
         case .struct(let name, let fields):
-            guard !fields.isEmpty else {
+            guard let fields else {
                 if let name {
                     return name
                 } else {
                     return "struct {}"
                 }
             }
-            let fields = fields
+            let fieldDefs = fields
                 .enumerated()
                 .map {
                     $1.decoded(fallbackName: "x\($0)", tab: tab)
@@ -151,13 +151,13 @@ extension ObjCType: ObjCTypeDecodable {
             if let name {
                 return """
                 struct \(name) {
-                \(fields)
+                \(fieldDefs)
                 }
                 """
             } else {
                 return """
                 struct {
-                \(fields)
+                \(fieldDefs)
                 }
                 """
             }
@@ -213,28 +213,28 @@ extension ObjCType: ObjCTypeEncodable {
         case .bitField(let width):
             return "b\(width)"
         case .union(let name, let fields):
-            guard !fields.isEmpty else {
+            guard let fields else {
                 if let name { return "(\(name))" }
                 else { return "()" }
             }
-            let fields = fields.map({ $0.encoded() })
+            let fieldDefs = fields.map({ $0.encoded() })
                 .joined()
             if let name {
-                return "(\(name)=\(fields))"
+                return "(\(name)=\(fieldDefs))"
             } else {
                 return "(?=\(fields))"
             }
         case .struct(let name, let fields):
-            guard !fields.isEmpty else {
+            guard let fields else {
                 if let name { return "{\(name)}" }
                 else { return "{}" }
             }
-            let fields = fields.map({ $0.encoded() })
+            let fieldDefs = fields.map({ $0.encoded() })
                 .joined()
             if let name {
-                return "{\(name)=\(fields)}"
+                return "{\(name)=\(fieldDefs)}"
             } else {
-                return "{?=\(fields)}"
+                return "{?=\(fieldDefs)}"
             }
         case .modified(let modifier, let type):
             return "\(modifier.encoded())\(type.encoded())"
