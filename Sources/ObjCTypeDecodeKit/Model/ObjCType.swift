@@ -222,7 +222,7 @@ extension ObjCType: ObjCTypeEncodable {
             if let name {
                 return "(\(name)=\(fieldDefs))"
             } else {
-                return "(?=\(fields))"
+                return "(?=\(fieldDefs))"
             }
         case .struct(let name, let fields):
             guard let fields else {
