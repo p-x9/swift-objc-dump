@@ -29,6 +29,27 @@ extension String {
         return nil
     }
     
+    /// Finds the index of the first closing double quote that matches the given opening double quote in the string.
+    /// - Parameter openIndex: The index of the opening double quote.
+    /// - Returns: The index of the matching closing double quote, or `nil` if not found.
+    func indexForFirstMatchingQuote(
+        openIndex: String.Index
+    ) -> Int? {
+        var inQuote = false
+        var index = openIndex
+        while index < endIndex {
+            if self[index] == "\"" {
+                if inQuote {
+                    return distance(from: startIndex, to: index)
+                } else {
+                    inQuote = true
+                }
+            }
+            index = self.index(after: index)
+        }
+        return nil
+    }
+
     /// Extracts the initial sequence of numeric characters from the string.
     /// - Returns: A string containing the initial sequence of numeric characters if any, otherwise `nil`.
     /// - Complexity: O(n), where n is the length of the string.

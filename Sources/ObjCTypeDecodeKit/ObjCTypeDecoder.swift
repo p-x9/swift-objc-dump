@@ -18,6 +18,27 @@ public enum ObjCTypeDecoder {
         guard let first = type.first else { return nil }
 
         switch first {
+        // decode `id`
+        // ref: https://github.com/gnustep/libobjc2/blob/2855d1771478e1e368fcfeb4d56aecbb4d9429ca/encoding2.c#L159
+        case _ where type.starts(with: "@?"):
+            var trailing = type
+            trailing.removeFirst(2)
+            return .init(decoded: "id /* block */", trailing: trailing)
+
+        case _ where type.starts(with: "@"):
+            guard let closingIndex = type.indexForFirstMatchingQuote(
+                openIndex: type.index(after: type.startIndex)
+            ) else { return nil }
+            let startIndex = type.index(type.startIndex, offsetBy: 2)
+            let endIndex = type.index(type.startIndex, offsetBy: closingIndex)
+            let name = String(type[startIndex ..< endIndex])
+
+            var trailing: String?
+            if type.distance(from: endIndex, to: type.endIndex) > 0 {
+                trailing = String(type[endIndex ..< type.endIndex])
+            }
+            return .init(decoded: "\(name) *", trailing: trailing)
+
         case _ where simpleTypes.keys.contains(first):
             var trailing = type
             trailing.removeFirst()
@@ -65,7 +86,7 @@ public enum ObjCTypeDecoder {
     }
 
     // MARK: - Bit Field b
-    private static func _decodeBitField(_ type: String, number: Int) -> (field: String, trailing: String?)? {
+    private static func _decodeBitField(_ type: String, name: String) -> (field: String, trailing: String?)? {
         var content = type
         content.removeFirst() // b
 
@@ -78,7 +99,7 @@ public enum ObjCTypeDecoder {
         if content.distance(from: startInex, to: content.endIndex) > 0 {
             trailing = String(content[startInex ..< content.endIndex])
         }
-        return ("int x\(number) : \(length);", trailing)
+        return ("int \(name) : \(length);", trailing)
     }
 
     // MARK: - Array []
@@ -194,9 +215,27 @@ public enum ObjCTypeDecoder {
 
     private static func _decodeField(_ type: String, number: Int) -> (field: String, trailing: String?)? {
         guard let first = type.first else { return nil }
-        if first == "b" {
-            return _decodeBitField(type, number: number)
-        } else {
+        switch first {
+        case "b":
+            return _decodeBitField(type, name: "x\(number)")
+        case "\"":
+            guard let closingIndex = type.indexForFirstMatchingQuote(
+                openIndex: type.startIndex
+            ) else { return nil }
+            let startIndex = type.index(type.startIndex, offsetBy: 1)
+            let endIndex = type.index(type.startIndex, offsetBy: closingIndex)
+            let name = String(type[startIndex ..< endIndex])
+
+            let contentType = String(type[type.index(after: endIndex) ..< type.endIndex])
+            if let node = _decoded(contentType),
+                  let contentType = node.decoded {
+                return ("\(contentType) \(name);", node.trailing)
+            } else if contentType.starts(with: "b"),
+                    let (field, trailing) = _decodeBitField(contentType, name: name) {
+                return (field, trailing)
+            } else { return nil }
+
+        default:
             guard let node = _decoded(type),
                   let decoded = node.decoded else {
                 return nil

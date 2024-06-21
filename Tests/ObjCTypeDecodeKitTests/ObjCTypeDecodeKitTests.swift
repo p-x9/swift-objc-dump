@@ -46,6 +46,17 @@ final class ObjCTypeDecodeKitTests: XCTestCase {
         XCTAssertEqual(decoded("%"), "atom") // FIXME: ?????
     }
 
+    func testNamedId() {
+        XCTAssertEqual(
+            decoded(#"@"NSLayoutManager""#),
+            "NSLayoutManager *"
+        )
+        XCTAssertEqual(
+            decoded(#"@?"#),
+            "id /* block */"
+        )
+    }
+
     func testPointers() {
         XCTAssertEqual(decoded("^i"), "int *")
         XCTAssertEqual(decoded("^v"), "void *")
@@ -69,6 +80,18 @@ final class ObjCTypeDecodeKitTests: XCTestCase {
         XCTAssertEqual(
             decoded("{CGRect={CGPoint=dd}{CGSize=dd}}"),
             "struct CGRect { struct CGPoint { double x0; double x1; } x0; struct CGSize { double x0; double x1; } x1; }"
+        )
+        XCTAssertEqual(
+            decoded(#"{CGSize="width"d"height"d}"#),
+            "struct CGSize { double width; double height; }"
+        )
+        XCTAssertEqual(
+            decoded(#"{CGRect="origin"{CGPoint="x"d"y"d}"size"{CGSize="width"d"height"d}}"#),
+            "struct CGRect { struct CGPoint { double x; double y; } origin; struct CGSize { double width; double height; } size; }"
+        )
+        XCTAssertEqual(
+            decoded(#"{_tvFlags="horizontallyResizable"b1"verticallyResizable"b1"viewOwnsTextStorage"b1"displayWithoutLayout"b1"settingMarkedRange"b1"containerOriginInvalid"b1"registeredForDragging"b1"superviewIsClipView"b1"forceRulerUpdate"b1"typingText"b1"wasPostingFrameNotifications"b1"wasRotatedOrScaledFromBase"b1"settingNeedsDisplay"b1"mouseInside"b1"verticalLayout"b2"diagonallyRotatedOrScaled"b1"hasScaledBacking"b1"shouldCloseQL"b1"dragUpdateRequstOwner"b1"genericDragRemoveSource"b1"isAttributedPlaceholder"b1"isDDAction"b1"showingFindIndicator"b1"isDrawingLayer"b1"touchBarInstantiated"b1"calculatingContainerOrigin"b1"doesOverrideDrawInsertionPointInRect"b1"darkEffectiveAppearance"b1"isPresentingReveal"b1"isDrawingFindIndicatorContent"b1"isAutoscrollingForTextLayoutManager"b1"_downgradeState"b2"isWatchingUnspecifiedClipView"b1}"#),
+            "struct _tvFlags { int horizontallyResizable : 1; int verticallyResizable : 1; int viewOwnsTextStorage : 1; int displayWithoutLayout : 1; int settingMarkedRange : 1; int containerOriginInvalid : 1; int registeredForDragging : 1; int superviewIsClipView : 1; int forceRulerUpdate : 1; int typingText : 1; int wasPostingFrameNotifications : 1; int wasRotatedOrScaledFromBase : 1; int settingNeedsDisplay : 1; int mouseInside : 1; int verticalLayout : 2; int diagonallyRotatedOrScaled : 1; int hasScaledBacking : 1; int shouldCloseQL : 1; int dragUpdateRequstOwner : 1; int genericDragRemoveSource : 1; int isAttributedPlaceholder : 1; int isDDAction : 1; int showingFindIndicator : 1; int isDrawingLayer : 1; int touchBarInstantiated : 1; int calculatingContainerOrigin : 1; int doesOverrideDrawInsertionPointInRect : 1; int darkEffectiveAppearance : 1; int isPresentingReveal : 1; int isDrawingFindIndicatorContent : 1; int isAutoscrollingForTextLayoutManager : 1; int _downgradeState : 2; int isWatchingUnspecifiedClipView : 1; }"
         )
     }
 
