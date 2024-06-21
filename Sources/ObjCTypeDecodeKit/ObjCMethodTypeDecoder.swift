@@ -64,10 +64,15 @@ public enum ObjCMethodTypeDecoder {
             )
         }
 
+        guard let selectorInfo = arguments.first else { return nil }
+        if arguments.count == 1 { arguments = [] }
+        else { arguments = Array(arguments[1...]) }
+
         return .init(
             returnType: returnType,
             stackSize: stackSize,
             selfInfo: selfInfo,
+            selectorInfo: selectorInfo,
             argumentInfos: arguments
         )
     }

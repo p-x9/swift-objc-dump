@@ -16,7 +16,9 @@ public struct ObjCMethodType {
 
     public let returnType: ObjCType
     public let stackSize: Int
+
     public let selfInfo: ArgumentInfo
+    public let selectorInfo: ArgumentInfo
     public let argumentInfos: [ArgumentInfo]
 }
 
@@ -25,7 +27,7 @@ extension ObjCMethodType: ObjCTypeEncodable {
         let arguments = argumentInfos
             .map({ $0.encoded() })
             .joined()
-        return "\(returnType.encoded())\(stackSize)\(selfInfo.encoded())\(arguments)"
+        return "\(returnType.encoded())\(stackSize)\(selfInfo.encoded())\(selectorInfo.encoded())\(arguments)"
     }
 }
 

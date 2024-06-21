@@ -202,7 +202,9 @@ final class ObjCMethodTypeDecodeTests: XCTestCase {
 
 extension ObjCMethodTypeDecodeTests {
     func checkEncode(_ encoded: String) {
-        XCTAssertEqual(decoded(encoded)?.encoded(), encoded)
+        let decoded = decoded(encoded)
+        XCTAssertEqual(decoded?.encoded(), encoded)
+        XCTAssertEqual(decoded?.selectorInfo.type.decoded(), "SEL")
     }
 }
 
