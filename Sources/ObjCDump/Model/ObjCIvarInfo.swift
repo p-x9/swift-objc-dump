@@ -23,6 +23,15 @@ extension ObjCIvarInfo {
 
 extension ObjCIvarInfo {
     public var headerString: String {
-        "\(type?.decodedStringForArgument ?? "unknown") \(name);"
+        if let type, case let .bitField(width) = type {
+            let field = ObjCField(
+                type: .int,
+                name: name,
+                bitWidth: width
+            )
+            return field.decoded(fallbackName: name)
+        } else {
+            return "\(type?.decoded() ?? "unknown") \(name);"
+        }
     }
 }

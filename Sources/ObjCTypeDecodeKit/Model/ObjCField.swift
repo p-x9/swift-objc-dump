@@ -12,6 +12,16 @@ public struct ObjCField {
     public let type: ObjCType
     public var name: String?
     public var bitWidth: Int?
+
+    package init(
+        type: ObjCType,
+        name: String? = nil,
+        bitWidth: Int? = nil
+    ) {
+        self.type = type
+        self.name = name
+        self.bitWidth = bitWidth
+    }
 }
 
 extension ObjCField: ObjCTypeDecodable {
