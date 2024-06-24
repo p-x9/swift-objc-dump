@@ -8,7 +8,7 @@
 
 import Foundation
 
-public indirect enum ObjCType {
+public indirect enum ObjCType: Equatable {
     case `class`
     case selector
 
