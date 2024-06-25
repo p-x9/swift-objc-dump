@@ -54,7 +54,11 @@ extension ObjCIvarInfo {
             )
             return field.decoded(fallbackName: name)
         } else {
-            return "\(type?.decoded() ?? "unknown") \(name);"
+            let type = type?.decoded()
+            if let type, type.last == "*" {
+                return "\(type)\(name);"
+            }
+            return "\(type ?? "unknown") \(name);"
         }
     }
 }
