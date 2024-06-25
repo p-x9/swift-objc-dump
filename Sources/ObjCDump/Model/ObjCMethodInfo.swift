@@ -11,9 +11,34 @@ import ObjCTypeDecodeKit
 
 @dynamicMemberLookup
 public struct ObjCMethodInfo {
-    let name: String
-    let typeEncoding: String
-    let isClassMethod: Bool
+    public let name: String
+    public let typeEncoding: String
+    public let isClassMethod: Bool
+
+    public init(
+        name: String,
+        typeEncoding: String,
+        isClassMethod: Bool
+    ) {
+        self.name = name
+        self.typeEncoding = typeEncoding
+        self.isClassMethod = isClassMethod
+    }
+
+    public init?(
+        _ method: Method,
+        isClassMethod: Bool
+    ) {
+        guard let _typeEncoding = method_getTypeEncoding(method) else {
+            return nil
+        }
+        let _name = method_getName(method)
+        self.init(
+            name: NSStringFromSelector(_name),
+            typeEncoding: String(cString: _typeEncoding),
+            isClassMethod: isClassMethod
+        )
+    }
 }
 
 extension ObjCMethodInfo {

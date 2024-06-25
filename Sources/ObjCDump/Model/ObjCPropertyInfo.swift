@@ -12,12 +12,31 @@ import ObjCTypeDecodeKit
 public struct ObjCPropertyInfo {
     public let name: String
     public let attributesString: String
-    let isClassProperty: Bool
+    public let isClassProperty: Bool
 
-    init(name: String, attributes: String, isClassProperty: Bool) {
+    public init(
+        name: String,
+        attributes: String,
+        isClassProperty: Bool
+    ) {
         self.name = name
         self.attributesString = attributes
         self.isClassProperty = isClassProperty
+    }
+
+    public init?(
+        _ property: objc_property_t,
+        isClassProperty: Bool
+    ) {
+        guard let _attributes = property_getAttributes(property) else {
+            return nil
+        }
+        let _name = property_getName(property)
+        self.init(
+            name: String(cString: _name),
+            attributes: String(cString: _attributes),
+            isClassProperty: isClassProperty
+        )
     }
 }
 
