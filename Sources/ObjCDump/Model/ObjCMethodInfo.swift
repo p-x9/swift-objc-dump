@@ -39,6 +39,22 @@ public struct ObjCMethodInfo {
             isClassMethod: isClassMethod
         )
     }
+
+    public init?(
+        _ description: objc_method_description,
+        isClassMethod: Bool
+    ) {
+        guard let _name = description.name,
+              let _typeEncoding = description.types else {
+            return nil
+        }
+
+        self.init(
+            name: NSStringFromSelector(_name),
+            typeEncoding: String(cString: _typeEncoding),
+            isClassMethod: isClassMethod
+        )
+    }
 }
 
 extension ObjCMethodInfo {
