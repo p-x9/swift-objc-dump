@@ -36,6 +36,11 @@ public enum ObjCTypeDecoder {
             let trailing = type.trailing(after: endIndex)
             return .init(decoded: .object(name: name), trailing: trailing)
 
+        case _ where type.starts(with: "^?"):
+            var trailing = type
+            trailing.removeFirst(2)
+            return .init(decoded: .functionPointer, trailing: trailing)
+
         case _ where simpleTypes.keys.contains(first):
             var trailing = type
             trailing.removeFirst()

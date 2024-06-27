@@ -44,6 +44,7 @@ public indirect enum ObjCType: Equatable {
 
     case object(name: String?)
     case block
+    case functionPointer
 
     case array(type: ObjCType, size: Int?)
     case pointer(type: ObjCType)
@@ -91,6 +92,8 @@ extension ObjCType: ObjCTypeDecodable {
             }
         case .block:
             return "id /* block */"
+        case .functionPointer:
+            return "void * /* function pointer */"
         case .array(let type, let size):
             if let size {
                 return "\(type.decoded(tab: tab))[\(size)]"
@@ -202,6 +205,7 @@ extension ObjCType: ObjCTypeEncodable {
                 return "@"
             }
         case .block: return "@?"
+        case .functionPointer: return "^?"
         case .array(let type, let size):
             if let size {
                 return "[\(size)\(type.encoded())]"
