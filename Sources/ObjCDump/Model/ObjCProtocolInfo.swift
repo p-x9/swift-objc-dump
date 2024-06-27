@@ -112,10 +112,23 @@ extension ObjCProtocolInfo {
             lines += ["", "@required", ""]
         }
 
-        lines += classProperties.map(\.headerString)
-        lines += properties.map(\.headerString)
-        lines += classMethods.map(\.headerString)
-        lines += methods.map(\.headerString)
+        if !classProperties.isEmpty {
+            lines.append("")
+            lines += classProperties.map(\.headerString)
+        }
+        if !properties.isEmpty {
+            lines.append("")
+            lines += properties.map(\.headerString)
+        }
+
+        if !classMethods.isEmpty {
+            lines.append("")
+            lines += classMethods.map(\.headerString)
+        }
+        if !methods.isEmpty {
+            lines.append("")
+            lines += methods.map(\.headerString)
+        }
 
         if !optionalClassProperties.isEmpty ||
             !optionalProperties.isEmpty ||
