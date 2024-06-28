@@ -2,6 +2,13 @@
 
 A Swift Library for dumping objective-c class/protocol/method/property/ivar informations.
 
+<!-- # Badges -->
+
+[![Github issues](https://img.shields.io/github/issues/p-x9/swift-objc-dump)](https://github.com/p-x9/swift-objc-dump/issues)
+[![Github forks](https://img.shields.io/github/forks/p-x9/swift-objc-dump)](https://github.com/p-x9/swift-objc-dump/network/members)
+[![Github stars](https://img.shields.io/github/stars/p-x9/swift-objc-dump)](https://github.com/p-x9/swift-objc-dump/stargazers)
+[![Github top language](https://img.shields.io/github/languages/top/p-x9/swift-objc-dump)](https://github.com/p-x9/swift-objc-dump/)
+
 ## Usage
 
 Information on Objective-C class/protocol/method/property/ivar can be obtained as follows.
