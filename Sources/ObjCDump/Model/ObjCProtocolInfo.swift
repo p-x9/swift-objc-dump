@@ -134,7 +134,7 @@ extension ObjCProtocolInfo {
             !properties.isEmpty ||
             !classMethods.isEmpty ||
             !methods.isEmpty {
-            lines += ["", "@required", ""]
+            lines += ["", "@required"]
         }
 
         if !classProperties.isEmpty {
@@ -159,13 +159,25 @@ extension ObjCProtocolInfo {
             !optionalProperties.isEmpty ||
             !optionalClassMethods.isEmpty ||
             !optionalMethods.isEmpty {
-            lines += ["", "@optional", ""]
+            lines += ["", "@optional"]
         }
 
-        lines += optionalClassProperties.map(\.headerString)
-        lines += optionalProperties.map(\.headerString)
-        lines += optionalClassMethods.map(\.headerString)
-        lines += optionalMethods.map(\.headerString)
+        if !optionalClassProperties.isEmpty {
+            lines.append("")
+            lines += optionalClassProperties.map(\.headerString)
+        }
+        if !optionalProperties.isEmpty {
+            lines.append("")
+            lines += optionalProperties.map(\.headerString)
+        }
+        if !optionalClassMethods.isEmpty {
+            lines.append("")
+            lines += optionalClassMethods.map(\.headerString)
+        }
+        if !optionalMethods.isEmpty {
+            lines.append("")
+            lines += optionalMethods.map(\.headerString)
+        }
 
         lines += ["", "@end"]
 
