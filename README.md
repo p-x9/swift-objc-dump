@@ -44,6 +44,42 @@ import ObjCDump
 
 let info = classInfo(of: NSObject.self)
 print(info.headerString)
+
+/*
+@interface NSObject <CARenderValue, CAAnimatableValue, NSObject> {
+    Class isa;
+}
+
+@property(class, readonly) BOOL accessInstanceVariablesDirectly;
+
+@property(readonly, copy) NSClassDescription *classDescription;
+@property(readonly, copy) NSArray *attributeKeys;
+
+/* ...... */
+
++ (BOOL)xr_object:(id)arg0 isEqual:(id)arg1;
++ (void)dealloc;
++ (id)description;
++ (void)doesNotRecognizeSelector:(SEL)arg0;
++ (id)init;
++ (id)instanceMethodSignatureForSelector:(SEL)arg0;
++ (void)load;
++ (id)methodSignatureForSelector:(SEL)arg0;
++ (id)__allocWithZone_OA:(struct _NSZone {  } *)arg0;
+
+/* ...... */
+
+- (id)performSelector:(SEL)arg0 withObject:(id)arg1 withObject:(id)arg2;
+- (BOOL)respondsToSelector:(SEL)arg0;
+- (id)retain;
+- (unsigned long long)retainCount;
+- (BOOL)retainWeakReference;
+- (id)self;
+- (Class)superclass;
+- (struct _NSZone {  } *)zone;
+
+@end
+*/
 ```
 
 ### Objective-C type encoding
