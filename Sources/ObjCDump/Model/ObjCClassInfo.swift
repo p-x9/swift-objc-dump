@@ -8,26 +8,51 @@
 
 import Foundation
 
+/// Structure for representing objc class information.
 public struct ObjCClassInfo {
+    /// Name of the class
     public let name: String
+    /// Version of the class
     public let version: Int32
+    /// Name of the dynamic library the class originated from.
     public let imageName: String?
 
+    /// Size of instances of the class.
     public let instanceSize: Int
 
+    /// Super class name of the class
     public let superClassName: String?
 
+    /// List of protocols to which the class conforms.
     public let protocols: [ObjCProtocolInfo]
 
+    /// List of instance variables held by the class.
     public let ivars: [ObjCIvarInfo]
 
+    /// List of class properties held by the class.
     public let classProperties: [ObjCPropertyInfo]
+    /// List of instance properties held by the class.
     public let properties: [ObjCPropertyInfo]
 
+    /// List of class methods held by the class.
     public let classMethods: [ObjCMethodInfo]
+    /// List of instance methods held by the class.
     public let methods: [ObjCMethodInfo]
 
-
+    
+    /// Initializes a new instance of `ObjCClassInfo`.
+    /// - Parameters:
+    ///   - name: Name of the class
+    ///   - version: Version of the class
+    ///   - imageName: Name of the dynamic library the class originated from.
+    ///   - instanceSize: Size of instances of the class.
+    ///   - superClassName: Super class name of the class
+    ///   - protocols: List of protocols to which the class conforms.
+    ///   - ivars: List of instance variables held by the class.
+    ///   - classProperties: List of class properties held by the class.
+    ///   - properties: List of instance properties held by the class.
+    ///   - classMethods: List of class methods held by the class.
+    ///   - methods: List of instance methods held by the class.
     public init(
         name: String,
         version: Int32,
@@ -53,7 +78,9 @@ public struct ObjCClassInfo {
         self.classMethods = classMethods
         self.methods = methods
     }
-
+    
+    /// Initializes a new instance of `ObjCClassInfo`.
+    /// - Parameter cls: Class of the target for which information is to be obtained.
     public init(_ cls: AnyClass) {
         // Name
         let name = NSStringFromClass(cls)

@@ -8,21 +8,44 @@
 
 import Foundation
 
+/// Structure for representing objc protocol information.
 public struct ObjCProtocolInfo {
+    /// Name of the protocol
     public let name: String
 
+    /// List of protocols to which the protocol conforms.
     public let protocols: [ObjCProtocolInfo]
 
+    /// List of required class properties.
     public let classProperties: [ObjCPropertyInfo]
+    /// List of required instance properties.
     public let properties: [ObjCPropertyInfo]
+    /// List of required class methods.
     public let classMethods: [ObjCMethodInfo]
+    /// List of required instance methods.
     public let methods: [ObjCMethodInfo]
 
+    /// List of optional class properties.
     public let optionalClassProperties: [ObjCPropertyInfo]
+    /// List of optional instance properties.
     public let optionalProperties: [ObjCPropertyInfo]
+    /// List of optional class methods.
     public let optionalClassMethods: [ObjCMethodInfo]
+    /// List of optional instance methods.
     public let optionalMethods: [ObjCMethodInfo]
-
+    
+    /// Initializes a new instance of `ObjCProtocolInfo`.
+    /// - Parameters:
+    ///   - name: Name of the protocol
+    ///   - protocols: List of protocols to which the protocol conforms.
+    ///   - classProperties: List of required class properties.
+    ///   - properties: List of required instance properties.
+    ///   - classMethods: List of required class methods.
+    ///   - methods: List of required instance methods.
+    ///   - optionalClassProperties: List of optional class properties.
+    ///   - optionalProperties: List of optional instance properties.
+    ///   - optionalClassMethods: List of optional class methods.
+    ///   - optionalMethods: List of optional instance methods.
     public init(
         name: String,
         protocols: [ObjCProtocolInfo],
@@ -46,7 +69,9 @@ public struct ObjCProtocolInfo {
         self.optionalClassMethods = optionalClassMethods
         self.optionalMethods = optionalMethods
     }
-
+    
+    /// Initializes a new instance of `ObjCProtocolInfo`.
+    /// - Parameter `protocol`: Protocol of the target for which information is to be obtained.
     public init(_ `protocol`: Protocol) {
         // Name
         let _name = protocol_getName(`protocol`)

@@ -9,11 +9,20 @@
 import Foundation
 import ObjCTypeDecodeKit
 
+/// Structure for representing objc instance variable information.
 public struct ObjCIvarInfo {
+    /// Name of the Ivar
     public let name: String
+    /// Encoded type of the Ivar
     public let typeEncoding: String
+    /// Offset of Ivar
     public let offset: Int
-
+    
+    /// Initializes a new instance of `ObjCIvarInfo`.
+    /// - Parameters:
+    ///   - name: Name of the Ivar
+    ///   - typeEncoding: Encoded type of the Ivar
+    ///   - offset: Offset of Ivar
     public init(
         name: String,
         typeEncoding: String,
@@ -23,7 +32,9 @@ public struct ObjCIvarInfo {
         self.typeEncoding = typeEncoding
         self.offset = offset
     }
-
+    
+    /// Initializes a new instance of `ObjCIvarInfo`.
+    /// - Parameter ivar: Ivar of the target for which information is to be obtained.
     public init?(_ ivar: Ivar) {
         guard let _name = ivar_getName(ivar),
               let _typeEncoding = ivar_getTypeEncoding(ivar) else {
@@ -39,6 +50,7 @@ public struct ObjCIvarInfo {
 }
 
 extension ObjCIvarInfo {
+    /// Type of Ivar
     public var type: ObjCType? {
         ObjCTypeDecoder.decode(typeEncoding)
     }

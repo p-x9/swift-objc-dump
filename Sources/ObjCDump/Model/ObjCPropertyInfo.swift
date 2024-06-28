@@ -9,11 +9,20 @@
 import Foundation
 import ObjCTypeDecodeKit
 
+/// Structure for representing objc property information.
 public struct ObjCPropertyInfo {
+    /// Name of the property
     public let name: String
+    /// Attributes string of the property
     public let attributesString: String
+    /// A boolean value that indicates whatever the property is class property or not.
     public let isClassProperty: Bool
-
+    
+    /// Initializes a new instance of `ObjCPropertyInfo`.
+    /// - Parameters:
+    ///   - name: Name of the property
+    ///   - attributes: Attributes string of the property
+    ///   - isClassProperty: A boolean value that indicates whatever the property is class property or not.
     public init(
         name: String,
         attributes: String,
@@ -23,7 +32,11 @@ public struct ObjCPropertyInfo {
         self.attributesString = attributes
         self.isClassProperty = isClassProperty
     }
-
+    
+    /// Initializes a new instance of `ObjCPropertyInfo`.
+    /// - Parameters:
+    ///   - property: Property of the target for which information is to be obtained.
+    ///   - isClassProperty: A boolean value that indicates whatever the property is class property or not.
     public init?(
         _ property: objc_property_t,
         isClassProperty: Bool
@@ -41,6 +54,7 @@ public struct ObjCPropertyInfo {
 }
 
 extension ObjCPropertyInfo {
+    /// Attribute list of the property
     public var attributes: [ObjCPropertyAttribute] {
         ObjCPropertyTypeDecoder.decode(attributesString)
     }

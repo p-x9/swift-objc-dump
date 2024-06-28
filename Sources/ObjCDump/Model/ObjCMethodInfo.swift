@@ -9,12 +9,21 @@
 import Foundation
 import ObjCTypeDecodeKit
 
+/// Structure for representing objc method information.
 @dynamicMemberLookup
 public struct ObjCMethodInfo {
+    /// Name of the method
     public let name: String
+    /// Encoded method type of the method
     public let typeEncoding: String
+    /// A boolean value that indicates whatever the method is class method or not.
     public let isClassMethod: Bool
-
+    
+    /// Initializes a new instance of `ObjCMethodInfo`.
+    /// - Parameters:
+    ///   - name: Name of the method
+    ///   - typeEncoding: Encoded method type of the method
+    ///   - isClassMethod: A boolean value that indicates whatever the method is class method or not.
     public init(
         name: String,
         typeEncoding: String,
@@ -24,7 +33,11 @@ public struct ObjCMethodInfo {
         self.typeEncoding = typeEncoding
         self.isClassMethod = isClassMethod
     }
-
+    
+    /// Initializes a new instance of `ObjCMethodInfo`.
+    /// - Parameters:
+    ///   - method: Method of the target for which information is to be obtained.
+    ///   - isClassMethod: A boolean value that indicates whatever the method is class method or not.
     public init?(
         _ method: Method,
         isClassMethod: Bool
@@ -39,7 +52,11 @@ public struct ObjCMethodInfo {
             isClassMethod: isClassMethod
         )
     }
-
+    
+    /// Initializes a new instance of `ObjCMethodInfo`.
+    /// - Parameters:
+    ///   - description: Method description of the target for which information is to be obtained.
+    ///   - isClassMethod: A boolean value that indicates whatever the method is class method or not.
     public init?(
         _ description: objc_method_description,
         isClassMethod: Bool
@@ -58,6 +75,9 @@ public struct ObjCMethodInfo {
 }
 
 extension ObjCMethodInfo {
+    /// Method type of the method
+    ///
+    /// It includes the type of the arguments and the type of the return value.
     public var type: ObjCMethodType? {
         ObjCMethodTypeDecoder.decode(typeEncoding)
     }
