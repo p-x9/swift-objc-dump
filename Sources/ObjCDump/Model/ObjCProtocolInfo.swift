@@ -46,6 +46,9 @@ public struct ObjCProtocolInfo {
     ///   - optionalProperties: List of optional instance properties.
     ///   - optionalClassMethods: List of optional class methods.
     ///   - optionalMethods: List of optional instance methods.
+    ///
+    /// Objective-C protocol does not currently support optional properties.
+    /// [reference](https://github.com/apple-oss-distributions/objc4/blob/01edf1705fbc3ff78a423cd21e03dfc21eb4d780/runtime/objc-runtime-new.mm#L5255)
     public init(
         name: String,
         protocols: [ObjCProtocolInfo],
@@ -53,8 +56,8 @@ public struct ObjCProtocolInfo {
         properties: [ObjCPropertyInfo],
         classMethods: [ObjCMethodInfo],
         methods: [ObjCMethodInfo],
-        optionalClassProperties: [ObjCPropertyInfo],
-        optionalProperties: [ObjCPropertyInfo],
+        optionalClassProperties: [ObjCPropertyInfo] = [],
+        optionalProperties: [ObjCPropertyInfo] = [],
         optionalClassMethods: [ObjCMethodInfo],
         optionalMethods: [ObjCMethodInfo]
     ) {
