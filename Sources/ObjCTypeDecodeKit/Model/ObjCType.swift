@@ -105,9 +105,9 @@ extension ObjCType: ObjCTypeDecodable {
         case .bitField(let width):
             return "int x : \(width)"
         case .union(let name, let fields):
-            guard let fields else {
+            guard let fields, !fields.isEmpty else {
                 if let name {
-                    return name
+                    return "union \(name)"
                 } else {
                     return "union {}"
                 }
@@ -135,9 +135,9 @@ extension ObjCType: ObjCTypeDecodable {
                 """
             }
         case .struct(let name, let fields):
-            guard let fields else {
+            guard let fields, !fields.isEmpty else {
                 if let name {
-                    return name
+                    return "struct \(name)"
                 } else {
                     return "struct {}"
                 }
