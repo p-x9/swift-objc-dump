@@ -64,13 +64,27 @@ extension ObjCIvarInfo {
                 name: name,
                 bitWidth: width
             )
-            return field.decoded(fallbackName: name)
+            return field.decodedForHeader(fallbackName: name)
         } else {
+            if [.char, .uchar].contains(type) {
+                return "BOOL \(name)"
+            }
             let type = type?.decoded()
             if let type, type.last == "*" {
                 return "\(type)\(name);"
             }
             return "\(type ?? "unknown") \(name);"
         }
+    }
+}
+
+extension ObjCField {
+    func decodedForHeader(
+        fallbackName: String, tab: String = "    "
+    ) -> String  {
+        if [.char, .uchar].contains(type) {
+            return "BOOL \(name ?? fallbackName);"
+        }
+        return decoded(fallbackName: fallbackName, tab: tab)
     }
 }

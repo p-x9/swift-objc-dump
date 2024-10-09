@@ -26,9 +26,16 @@ extension ObjCType {
                 let type: ObjCType = .union(name: nil, fields: field)
                 return type.decoded(tab: "")
             }
+        // Objective-C BOOL types may be represented by signed char or by C/C++ bool types.
+        // This means that the type encoding may be represented as C(c) or as B.
+        // [reference](https://github.com/apple-oss-distributions/objc4/blob/01edf1705fbc3ff78a423cd21e03dfc21eb4d780/runtime/objc.h#L61-L86)
+        case .char: fallthrough
+        case .uchar:
+            return "BOOL"
         default:
             break
         }
+        
         return decoded(tab: "")
             .components(separatedBy: .newlines)
             .joined(separator: " ")
