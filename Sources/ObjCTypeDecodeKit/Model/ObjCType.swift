@@ -86,6 +86,9 @@ extension ObjCType: ObjCTypeDecodable {
         case .atom: return "atom"
         case .object(let name):
             if let name {
+                if name.first == "<" && name.last == ">" {
+                    return "id \(name)"
+                }
                 return "\(name) *"
             } else {
                 return "id"
