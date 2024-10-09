@@ -26,9 +26,13 @@ extension ObjCType {
                 let type: ObjCType = .union(name: nil, fields: field)
                 return type.decoded(tab: "")
             }
+        case .char: fallthrough
+        case .uchar:
+            return "BOOL"
         default:
             break
         }
+        
         return decoded(tab: "")
             .components(separatedBy: .newlines)
             .joined(separator: " ")
