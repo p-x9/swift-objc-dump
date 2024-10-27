@@ -74,6 +74,14 @@ final class ObjCTypeEncodeTests: XCTestCase {
         checkEncode(#"{_tvFlags="horizontallyResizable"b1"verticallyResizable"b1"viewOwnsTextStorage"b1"displayWithoutLayout"b1"settingMarkedRange"b1"containerOriginInvalid"b1"registeredForDragging"b1"superviewIsClipView"b1"forceRulerUpdate"b1"typingText"b1"wasPostingFrameNotifications"b1"wasRotatedOrScaledFromBase"b1"settingNeedsDisplay"b1"mouseInside"b1"verticalLayout"b2"diagonallyRotatedOrScaled"b1"hasScaledBacking"b1"shouldCloseQL"b1"dragUpdateRequstOwner"b1"genericDragRemoveSource"b1"isAttributedPlaceholder"b1"isDDAction"b1"showingFindIndicator"b1"isDrawingLayer"b1"touchBarInstantiated"b1"calculatingContainerOrigin"b1"doesOverrideDrawInsertionPointInRect"b1"darkEffectiveAppearance"b1"isPresentingReveal"b1"isDrawingFindIndicatorContent"b1"isAutoscrollingForTextLayoutManager"b1"_downgradeState"b2"isWatchingUnspecifiedClipView"b1}"#)
     }
 
+    func testBlock() {
+        checkEncode("@?")
+        checkEncode("@?<v@?>")
+        checkEncode(#"@?<v@?@"CKSyncEngineFetchChangesOptions">"#)
+        checkEncode(#"@?<v@?@"AMSAuthenticateResult"@"NSError">"#)
+        checkEncode(#"@?<v@?@"UIViewController<HUPresentationDelegateHost>">"#)
+    }
+
     func testAtomic() {
         checkEncode("Ai")
         checkEncode("A*")
