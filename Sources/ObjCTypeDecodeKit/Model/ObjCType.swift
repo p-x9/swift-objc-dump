@@ -43,7 +43,7 @@ public indirect enum ObjCType: Equatable {
     case atom
 
     case object(name: String?)
-    case block
+    case block(return: ObjCType?, args: [ObjCType]?)
     case functionPointer
 
     case array(type: ObjCType, size: Int?)
@@ -93,8 +93,14 @@ extension ObjCType: ObjCTypeDecodable {
             } else {
                 return "id"
             }
-        case .block:
-            return "id /* block */"
+        case .block(let ret, let args):
+            guard let ret, let args else {
+                return "id /* block */"
+            }
+            let argTypes = args
+                .map({ $0.decoded(tab: tab) })
+                .joined(separator: ", ")
+            return "\(ret.decoded(tab: tab)) (^)(\(argTypes))"
         case .functionPointer:
             return "void * /* function pointer */"
         case .array(let type, let size):
@@ -207,7 +213,12 @@ extension ObjCType: ObjCTypeEncodable {
             } else {
                 return "@"
             }
-        case .block: return "@?"
+        case let .block(ret, args):
+            guard let ret, let args else {
+                return "@?"
+            }
+            let argTypes = args.map({ $0.encoded() }).joined()
+            return "@?<\(ret.encoded())@?\(argTypes)>"
         case .functionPointer: return "^?"
         case .array(let type, let size):
             if let size {

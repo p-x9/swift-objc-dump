@@ -23,7 +23,44 @@ public enum ObjCTypeDecoder {
         case _ where type.starts(with: "@?"):
             var trailing = type
             trailing.removeFirst(2)
-            return .init(decoded: .block, trailing: trailing)
+
+            if trailing.starts(with: "<") {
+                guard let closingIndex = trailing.indexForMatchingBracket(
+                    open: "<", close: ">"
+                ) else { return nil }
+                let startInex = trailing.index(trailing.startIndex, offsetBy: 1)
+                let endIndex = trailing.index(trailing.startIndex, offsetBy: closingIndex)
+                let content = String(trailing[startInex ..< endIndex]) // <content>
+                guard let retNode = _decode(content),
+                      let retType = retNode.decoded else {
+                    return nil
+                }
+                guard var args = retNode.trailing else { return nil }
+                guard args.starts(with: "@?") else { return nil }
+                args.removeFirst(2)
+                var argTypes: [ObjCType] = []
+                while !args.isEmpty {
+                    guard let node = _decode(args),
+                          let argType = node.decoded else {
+                        return nil
+                    }
+                    argTypes.append(argType)
+                    if let trailing = node.trailing {
+                        args = trailing
+                    } else {
+                        break
+                    }
+                }
+                let trailing = trailing.trailing(after: endIndex)
+                return .init(
+                    decoded: .block(return: retType, args: argTypes),
+                    trailing: trailing
+                )
+            }
+            return .init(
+                decoded: .block(return: nil, args: nil),
+                trailing: trailing
+            )
 
         case _ where type.starts(with: #"@""#):
             guard let closingIndex = type.indexForFirstMatchingQuote(
