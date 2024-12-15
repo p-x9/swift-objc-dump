@@ -18,6 +18,8 @@ extension ObjCType {
             } else {
                 let type: ObjCType = .struct(name: nil, fields: field)
                 return type.decoded(tab: "")
+                    .components(separatedBy: .newlines)
+                    .joined(separator: " ")
             }
         case .union(let name, let field):
             if let name {
@@ -25,6 +27,8 @@ extension ObjCType {
             } else {
                 let type: ObjCType = .union(name: nil, fields: field)
                 return type.decoded(tab: "")
+                    .components(separatedBy: .newlines)
+                    .joined(separator: " ")
             }
         // Objective-C BOOL types may be represented by signed char or by C/C++ bool types.
         // This means that the type encoding may be represented as C(c) or as B.
