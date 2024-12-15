@@ -56,3 +56,39 @@ public struct ObjCCategoryInfo {
         self.methods = methods
     }
 }
+
+extension ObjCCategoryInfo {
+    public var headerString: String {
+        var decl = "@interface \(className) (\(name))"
+
+        if !protocols.isEmpty {
+            let protocols = protocols.map(\.name)
+                .joined(separator: ", ")
+            decl += " <\(protocols)>"
+        }
+
+        var lines = [decl]
+
+        if !classProperties.isEmpty {
+            lines.append("")
+            lines += classProperties.map(\.headerString)
+        }
+        if !properties.isEmpty {
+            lines.append("")
+            lines += properties.map(\.headerString)
+        }
+
+        if !classMethods.isEmpty {
+            lines.append("")
+            lines += classMethods.map(\.headerString)
+        }
+        if !methods.isEmpty {
+            lines.append("")
+            lines += methods.map(\.headerString)
+        }
+
+        lines += ["", "@end"]
+
+        return lines.joined(separator: "\n")
+    }
+}
