@@ -69,13 +69,12 @@ extension ObjCIvarInfo {
             return field.decodedForHeader(fallbackName: name)
         } else {
             if [.char, .uchar].contains(type) {
-                return "BOOL \(name)"
+                return "BOOL \(name);"
             }
-            let type = type?.decoded()
-            if let type, type.last == "*" {
-                return "\(type)\(name);"
+            if let type {
+                return "\(type.decoded(declarator: name));"
             }
-            return "\(type ?? "unknown") \(name);"
+            return "unknown \(name);"
         }
     }
 }

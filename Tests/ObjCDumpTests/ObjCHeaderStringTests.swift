@@ -1,0 +1,43 @@
+import XCTest
+@testable import ObjCDump
+
+final class ObjCHeaderStringTests: XCTestCase {
+    func testBOOLIvarEndsWithSemicolon() {
+        let signedChar = ObjCIvarInfo(
+            name: "_signedChar",
+            typeEncoding: "c",
+            offset: 0
+        )
+        let unsignedChar = ObjCIvarInfo(
+            name: "_unsignedChar",
+            typeEncoding: "C",
+            offset: 1
+        )
+
+        XCTAssertEqual(signedChar.headerString, "BOOL _signedChar;")
+        XCTAssertEqual(unsignedChar.headerString, "BOOL _unsignedChar;")
+    }
+
+    func testArrayIvarPlacesNameBeforeArraySuffix() {
+        let info = ObjCIvarInfo(
+            name: "_reserved",
+            typeEncoding: "[128C]",
+            offset: 0
+        )
+
+        XCTAssertEqual(info.headerString, "unsigned char _reserved[128];")
+    }
+
+    func testBlockPropertyPlacesNameInsideBlockDeclarator() {
+        let info = ObjCPropertyInfo(
+            name: "handler",
+            attributes: "T@?<v@?i>,C",
+            isClassProperty: false
+        )
+
+        XCTAssertEqual(
+            info.headerString,
+            "@property(copy) void (^handler)(int);"
+        )
+    }
+}

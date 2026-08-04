@@ -70,8 +70,6 @@ extension ObjCPropertyInfo {
             if case let .type(type) = $0, let type { return type }
             return nil
         }.first
-        let typeString = type?.decodedStringForArgument ?? "unknown"
-
         // Attributes
         var _attributes: [String] = []
         // class
@@ -139,12 +137,8 @@ extension ObjCPropertyInfo {
             result += _attributes.joined(separator: ", ")
             result += ")"
         }
-        result += " \(typeString)"
-        if typeString.last == "*" {
-            result += "\(name);"
-        } else {
-            result += " \(name);"
-        }
+        let declaration = type?.decoded(declarator: name) ?? "unknown \(name)"
+        result += " \(declaration);"
         if !comments.isEmpty {
             for comment in comments {
                 result += " // \(comment)"

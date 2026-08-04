@@ -60,12 +60,41 @@ final class ObjCTypeDecodeKitTests: XCTestCase {
     func testPointers() {
         XCTAssertEqual(decoded("^i"), "int *")
         XCTAssertEqual(decoded("^v"), "void *")
+        XCTAssertEqual(decoded("^[4i]"), "int (*)[4]")
     }
 
     func testArray() {
         XCTAssertEqual(decoded("[i]"), "int[]")
         XCTAssertEqual(decoded("[128i]"), "int[128]")
         XCTAssertEqual(decoded("[128^i]"), "int *[128]")
+    }
+
+    func testCDeclarator() {
+        XCTAssertEqual(
+            ObjCTypeDecoder.decode("[128C]")?.decoded(declarator: "buffer"),
+            "unsigned char buffer[128]"
+        )
+        XCTAssertEqual(
+            ObjCTypeDecoder.decode("[4^i]")?.decoded(declarator: "values"),
+            "int *values[4]"
+        )
+        XCTAssertEqual(
+            ObjCTypeDecoder.decode("^[4i]")?.decoded(declarator: "values"),
+            "int (*values)[4]"
+        )
+        XCTAssertEqual(
+            ObjCTypeDecoder.decode("@?<v@?i>")?.decoded(declarator: "handler"),
+            "void (^handler)(int)"
+        )
+        XCTAssertEqual(
+            ObjCTypeDecoder.decode(#"{Buffer="bytes"[4C]}"#)?
+                .decoded(declarator: "buffer"),
+            """
+            struct Buffer {
+                unsigned char bytes[4];
+            } buffer
+            """
+        )
     }
 
     func testUnion() {
@@ -85,7 +114,7 @@ final class ObjCTypeDecodeKitTests: XCTestCase {
                 int x0;
                 unsigned long long x1;
                 union {
-                    char * x0;
+                    char *x0;
                     BOOL x1;
                 } x2;
             }
@@ -94,6 +123,14 @@ final class ObjCTypeDecodeKitTests: XCTestCase {
     }
 
     func testStruct() {
+        XCTAssertEqual(
+            decoded(#"{Buffer="bytes"[4C]}"#),
+            """
+            struct Buffer {
+                unsigned char bytes[4];
+            }
+            """
+        )
         XCTAssertEqual(
             decoded("{CGRect={CGPoint=dd}{CGSize=dd}}"),
             """

@@ -61,124 +61,190 @@ public indirect enum ObjCType: Sendable, Equatable {
 
 extension ObjCType: ObjCTypeDecodable {
     public func decoded(tab: String = "    ") -> String {
+        decoded(declarator: "", tab: tab)
+    }
+}
+
+extension ObjCType {
+    /// Decodes the receiver as a C declarator containing `name`.
+    ///
+    /// The name is placed according to C's declarator grammar, so arrays and
+    /// blocks are rendered correctly.
+    public func decoded(
+        declarator name: String,
+        tab: String = "    "
+    ) -> String {
+        let components = declaratorComponents(name: name, tab: tab)
+        guard !components.declarator.isEmpty else {
+            return components.specifier
+        }
+        if components.declarator.first == "[" {
+            return "\(components.specifier)\(components.declarator)"
+        }
+        return "\(components.specifier) \(components.declarator)"
+    }
+}
+
+extension ObjCType {
+    private func declaratorComponents(
+        name: String,
+        tab: String
+    ) -> (specifier: String, declarator: String) {
         switch self {
-        case .class: return "Class"
-        case .selector: return "SEL"
-        case .char: return "char"
-        case .uchar: return "unsigned char"
-        case .short: return "short"
-        case .ushort: return "unsigned short"
-        case .int: return "int"
-        case .uint: return "unsigned int"
-        case .long: return "long"
-        case .ulong: return "unsigned long"
-        case .longLong: return "long long"
-        case .ulongLong: return "unsigned long long"
-        case .int128: return "__int128_t"
-        case .uint128: return "__uint128_t"
-        case .float: return "float"
-        case .double: return "double"
-        case .longDouble: return "long double"
-        case .bool: return "BOOL"
-        case .void: return "void"
-        case .unknown: return "unknown"
-        case .charPtr: return "char *"
-        case .atom: return "atom"
-        case .object(let name):
-            if let name {
-                if name.first == "<" && name.last == ">" {
-                    return "id \(name)"
-                }
-                return "\(name) *"
-            } else {
-                return "id"
+        case .class:
+            return ("Class", name)
+        case .selector:
+            return ("SEL", name)
+        case .char:
+            return ("char", name)
+        case .uchar:
+            return ("unsigned char", name)
+        case .short:
+            return ("short", name)
+        case .ushort:
+            return ("unsigned short", name)
+        case .int:
+            return ("int", name)
+        case .uint:
+            return ("unsigned int", name)
+        case .long:
+            return ("long", name)
+        case .ulong:
+            return ("unsigned long", name)
+        case .longLong:
+            return ("long long", name)
+        case .ulongLong:
+            return ("unsigned long long", name)
+        case .int128:
+            return ("__int128_t", name)
+        case .uint128:
+            return ("__uint128_t", name)
+        case .float:
+            return ("float", name)
+        case .double:
+            return ("double", name)
+        case .longDouble:
+            return ("long double", name)
+        case .bool:
+            return ("BOOL", name)
+        case .void:
+            return ("void", name)
+        case .unknown:
+            return ("unknown", name)
+        case .atom:
+            return ("atom", name)
+
+        case .charPtr:
+            return ("char", "*\(name)")
+
+        case .object(let objectName):
+            guard let objectName else {
+                return ("id", name)
             }
-        case .block(let ret, let args):
-            guard let ret, let args else {
-                return "id /* block */"
+            if objectName.first == "<" && objectName.last == ">" {
+                return ("id \(objectName)", name)
             }
-            let argTypes = args
-                .map({ $0.decoded(tab: tab) })
+            return (objectName, "*\(name)")
+
+        case .block(let returnType, let arguments):
+            guard let returnType, let arguments else {
+                return ("id /* block */", name)
+            }
+            let argumentList = arguments
+                .map { $0.decoded(declarator: "", tab: tab) }
                 .joined(separator: ", ")
-            return "\(ret.decoded(tab: tab)) (^)(\(argTypes))"
+            return (
+                returnType.decoded(declarator: "", tab: tab),
+                "(^\(name))(\(argumentList))"
+            )
+
         case .functionPointer:
-            return "void * /* function pointer */"
+            return ("void", "*\(name) /* function pointer */")
+
         case .array(let type, let size):
-            if let size {
-                return "\(type.decoded(tab: tab))[\(size)]"
-            } else {
-                return "\(type.decoded(tab: tab))[]"
-            }
+            let suffix = size.map { "[\($0)]" } ?? "[]"
+            return type.declaratorComponents(
+                name: "\(name)\(suffix)",
+                tab: tab
+            )
+
         case .pointer(let type):
-            return "\(type.decoded(tab: tab)) *"
+            let pointerName: String
+            if case .array = type {
+                pointerName = "(*\(name))"
+            } else {
+                pointerName = "*\(name)"
+            }
+            return type.declaratorComponents(name: pointerName, tab: tab)
+
         case .bitField(let width):
-            return "int x : \(width)"
-        case .union(let name, let fields):
-            guard let fields, !fields.isEmpty else {
-                if let name {
-                    return "union \(name)"
-                } else {
-                    return "union {}"
-                }
-            }
-            let fieldDefs = fields
-                .enumerated()
-                .map {
-                    $1.decoded(fallbackName: "x\($0)", tab: tab)
-                        .components(separatedBy: .newlines)
-                        .map { tab + $0 }
-                        .joined(separator: "\n")
-                }
-                .joined(separator: "\n")
-            if let name {
-                return """
-                union \(name) {
-                \(fieldDefs)
-                }
-                """
-            } else {
-                return """
-                union {
-                \(fieldDefs)
-                }
-                """
-            }
-        case .struct(let name, let fields):
-            guard let fields, !fields.isEmpty else {
-                if let name {
-                    return "struct \(name)"
-                } else {
-                    return "struct {}"
-                }
-            }
-            let fieldDefs = fields
-                .enumerated()
-                .map {
-                    $1.decoded(fallbackName: "x\($0)", tab: tab)
-                        .components(separatedBy: .newlines)
-                        .map { tab + $0 }
-                        .joined(separator: "\n")
-                }
-                .joined(separator: "\n")
-            if let name {
-                return """
-                struct \(name) {
-                \(fieldDefs)
-                }
-                """
-            } else {
-                return """
-                struct {
-                \(fieldDefs)
-                }
-                """
-            }
+            return ("int", "\(name.isEmpty ? "x" : name) : \(width)")
+
+        case .union(let typeName, let fields):
+            return (
+                aggregateSpecifier(
+                    kind: "union",
+                    name: typeName,
+                    fields: fields,
+                    tab: tab
+                ),
+                name
+            )
+
+        case .struct(let typeName, let fields):
+            return (
+                aggregateSpecifier(
+                    kind: "struct",
+                    name: typeName,
+                    fields: fields,
+                    tab: tab
+                ),
+                name
+            )
+
         case .modified(let modifier, let type):
-            return "\(modifier.decoded(tab: tab)) \(type.decoded(tab: tab))"
+            let components = type.declaratorComponents(name: name, tab: tab)
+            return (
+                "\(modifier.decoded(tab: tab)) \(components.specifier)",
+                components.declarator
+            )
 
         case .other(let string):
-            return string
+            return (string, name)
         }
+    }
+
+    private func aggregateSpecifier(
+        kind: String,
+        name: String?,
+        fields: [ObjCField]?,
+        tab: String
+    ) -> String {
+        let typeName = name.map { " \($0)" } ?? ""
+        guard let fields, !fields.isEmpty else {
+            return name.map { "\(kind) \($0)" } ?? "\(kind) {}"
+        }
+
+        let fieldDeclarations = fields.enumerated().map { index, field in
+            let fieldName = field.name ?? "x\(index)"
+            var declaration = field.type.decoded(
+                declarator: fieldName,
+                tab: tab
+            )
+            if let bitWidth = field.bitWidth {
+                declaration += " : \(bitWidth)"
+            }
+            return declaration
+                .components(separatedBy: .newlines)
+                .map { tab + $0 }
+                .joined(separator: "\n") + ";"
+        }.joined(separator: "\n")
+
+        return """
+        \(kind)\(typeName) {
+        \(fieldDeclarations)
+        }
+        """
     }
 }
 
