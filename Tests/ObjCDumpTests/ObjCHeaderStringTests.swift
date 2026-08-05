@@ -2,20 +2,24 @@ import XCTest
 @testable import ObjCDump
 
 final class ObjCHeaderStringTests: XCTestCase {
-    func testBOOLIvarEndsWithSemicolon() {
-        let signedChar = ObjCIvarInfo(
+    func testSignedCharIvarUsesBOOL() {
+        let info = ObjCIvarInfo(
             name: "_signedChar",
             typeEncoding: "c",
             offset: 0
         )
-        let unsignedChar = ObjCIvarInfo(
+
+        XCTAssertEqual(info.headerString, "BOOL _signedChar;")
+    }
+
+    func testUnsignedCharIvarRemainsUnsignedChar() {
+        let info = ObjCIvarInfo(
             name: "_unsignedChar",
             typeEncoding: "C",
             offset: 1
         )
 
-        XCTAssertEqual(signedChar.headerString, "BOOL _signedChar;")
-        XCTAssertEqual(unsignedChar.headerString, "BOOL _unsignedChar;")
+        XCTAssertEqual(info.headerString, "unsigned char _unsignedChar;")
     }
 
     func testArrayIvarPlacesNameBeforeArraySuffix() {

@@ -68,7 +68,7 @@ extension ObjCIvarInfo {
             )
             return field.decodedForHeader(fallbackName: name)
         } else {
-            if [.char, .uchar].contains(type) {
+            if type == .char {
                 return "BOOL \(name);"
             }
             if let type {
@@ -87,7 +87,7 @@ extension ObjCField {
     func decodedForHeader(
         fallbackName: String, tab: String = "    "
     ) -> String  {
-        if [.char, .uchar].contains(type) {
+        if type == .char {
             return "BOOL \(name ?? fallbackName);"
         }
         return decoded(fallbackName: fallbackName, tab: tab)
