@@ -74,7 +74,11 @@ extension ObjCIvarInfo {
             if let type {
                 return "\(type.decoded(declarator: name));"
             }
-            return "unknown \(name);"
+            let declaration = ObjCHeaderRendering.unknownTypeDeclaration(
+                declarator: name,
+                encoding: typeEncoding
+            )
+            return "\(declaration);"
         }
     }
 }

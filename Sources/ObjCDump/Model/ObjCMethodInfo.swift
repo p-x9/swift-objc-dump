@@ -95,30 +95,48 @@ extension ObjCMethodInfo {
         let type: ObjCMethodType? = self.type
 
         // return type
-        let returnType = type?.returnType.decodedStringForArgument ?? "unknown"
+        let returnType = type?.returnType.decodedStringForArgument
+            ?? ObjCHeaderRendering.unknownTypeDeclaration()
 
         // arguments
         let numberOfArguments = name.filter({ $0 == ":" }).count
         guard numberOfArguments > 0 else {
-            return "\(prefix) (\(returnType))\(name);"
+            var result = "\(prefix) (\(returnType))\(name);"
+            if type == nil {
+                result += ObjCHeaderRendering
+                    .unknownMethodEncodingComment(typeEncoding)
+            }
+            return result
         }
 
-        let nameAndLabels = name.split(separator: ":")
+        let nameAndLabels = name.split(
+            separator: ":",
+            omittingEmptySubsequences: false
+        ).map(String.init)
 
         let argumentInfos = type?.argumentInfos ?? []
         let argumentTypes = argumentInfos.map(\.type.decodedStringForArgument)
 
         var result = "\(prefix) (\(returnType))"
 
-        zip(nameAndLabels, argumentTypes).enumerated()
-            .forEach { (i, nameWithType) in
-                let (name, type) = nameWithType
-                var entry = "\(name):(\(type))arg\(i)"
-                if i != 0 { entry = " \(entry)" }
-                result += entry
-            }
+        for index in 0 ..< numberOfArguments {
+            let label = nameAndLabels[index]
+            let argumentType = argumentTypes.indices.contains(index)
+                ? argumentTypes[index]
+                : ObjCHeaderRendering.unknownTypeDeclaration()
+            var entry = "\(label):(\(argumentType))arg\(index)"
+            if index != 0 { entry = " \(entry)" }
+            result += entry
+        }
 
         result += ";"
+        if type == nil {
+            result += ObjCHeaderRendering
+                .unknownMethodEncodingComment(typeEncoding)
+        } else if argumentTypes.count != numberOfArguments {
+            result += ObjCHeaderRendering
+                .mismatchedMethodEncodingComment(typeEncoding)
+        }
 
         return result
     }

@@ -40,4 +40,46 @@ final class ObjCHeaderStringTests: XCTestCase {
             "@property(copy) void (^handler)(int);"
         )
     }
+
+    func testUnknownIvarUsesOpaquePointerWithRawEncoding() {
+        let info = ObjCIvarInfo(
+            name: "_value",
+            typeEncoding: "!",
+            offset: 0
+        )
+
+        XCTAssertEqual(
+            info.headerString,
+            "void *_value /* unknown: ! */;"
+        )
+    }
+
+    func testUnknownPropertyUsesOpaquePointerWithRawEncoding() {
+        let info = ObjCPropertyInfo(
+            name: "value",
+            attributes: "T!,N",
+            isClassProperty: false
+        )
+
+        XCTAssertEqual(
+            info.headerString,
+            "@property(nonatomic) void *value /* unknown: ! */;"
+        )
+    }
+
+    func testUnknownMethodKeepsEverySelectorLabel() {
+        let info = ObjCMethodInfo(
+            name: "doThing:withValue:",
+            typeEncoding: "!",
+            isClassMethod: false
+        )
+
+        XCTAssertEqual(
+            info.headerString,
+            "- (void * /* unknown */)doThing:"
+                + "(void * /* unknown */)arg0 withValue:"
+                + "(void * /* unknown */)arg1;"
+                + " /* unknown method encoding: ! */"
+        )
+    }
 }

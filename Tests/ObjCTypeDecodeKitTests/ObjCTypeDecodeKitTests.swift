@@ -40,7 +40,7 @@ final class ObjCTypeDecodeKitTests: XCTestCase {
 
         XCTAssertEqual(decoded("B"), "BOOL")
         XCTAssertEqual(decoded("v"), "void")
-        XCTAssertEqual(decoded("?"), "unknown")
+        XCTAssertEqual(decoded("?"), "void * /* unknown: ? */")
         XCTAssertEqual(decoded("*"), "char *")
 
         XCTAssertEqual(decoded("%"), "atom") // FIXME: ?????

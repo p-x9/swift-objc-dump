@@ -130,7 +130,7 @@ extension ObjCType {
         case .void:
             return ("void", name)
         case .unknown:
-            return ("unknown", name)
+            return ("void", "*\(name) /* unknown: ? */")
         case .atom:
             return ("atom", name)
 
