@@ -137,7 +137,7 @@ extension ObjCPropertyInfo {
             result += _attributes.joined(separator: ", ")
             result += ")"
         }
-        let declaration = type?.decoded(declarator: name)
+        let declaration = type?.decodedForProperty(declarator: name)
             ?? ObjCHeaderRendering.unknownTypeDeclaration(
                 declarator: name,
                 encoding: rawTypeEncoding
