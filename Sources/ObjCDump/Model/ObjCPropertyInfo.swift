@@ -3,7 +3,7 @@
 //
 //
 //  Created by p-x9 on 2024/06/24
-//  
+//
 //
 
 import Foundation
@@ -17,7 +17,7 @@ public struct ObjCPropertyInfo: Sendable {
     public let attributesString: String
     /// A boolean value that indicates whatever the property is class property or not.
     public let isClassProperty: Bool
-    
+
     /// Initializes a new instance of `ObjCPropertyInfo`.
     /// - Parameters:
     ///   - name: Name of the property
@@ -70,8 +70,6 @@ extension ObjCPropertyInfo {
             if case let .type(type) = $0, let type { return type }
             return nil
         }.first
-        let typeString = type?.decodedStringForArgument ?? "unknown"
-
         // Attributes
         var _attributes: [String] = []
         // class
@@ -139,12 +137,12 @@ extension ObjCPropertyInfo {
             result += _attributes.joined(separator: ", ")
             result += ")"
         }
-        result += " \(typeString)"
-        if typeString.last == "*" {
-            result += "\(name);"
-        } else {
-            result += " \(name);"
-        }
+        let declaration = type?.decodedForProperty(declarator: name)
+            ?? ObjCHeaderRendering.unknownTypeDeclaration(
+                declarator: name,
+                encoding: rawTypeEncoding
+            )
+        result += " \(declaration);"
         if !comments.isEmpty {
             for comment in comments {
                 result += " // \(comment)"
@@ -152,5 +150,16 @@ extension ObjCPropertyInfo {
         }
 
         return result
+    }
+}
+
+extension ObjCPropertyInfo {
+    private var rawTypeEncoding: String {
+        attributesString.split(
+            separator: ",",
+            omittingEmptySubsequences: false
+        ).first(where: { $0.first == "T" })
+            .map { String($0.dropFirst()) }
+            ?? attributesString
     }
 }
